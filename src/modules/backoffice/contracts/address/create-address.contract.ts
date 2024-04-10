@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Flunt } from 'src/utils/flunt';
 import { Contract } from '../contract';
-import { Address } from 'src/backoffice/models/address.model';
+import { Address } from '../../models/address.model';
 
 @Injectable()
 export class CreateAddressContract implements Contract {

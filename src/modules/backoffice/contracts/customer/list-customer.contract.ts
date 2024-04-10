@@ -1,7 +1,7 @@
 import { Flunt } from "src/utils/flunt";
 import { Contract } from "../contract";
 import { Injectable } from "@nestjs/common";
-import { QueryDto } from "src/backoffice/dtos/query.dto";
+import { QueryDto } from "../../dtos/query.dto";
 
 @Injectable()
 export class ListCustomerContract implements Contract {
@@ -9,6 +9,9 @@ export class ListCustomerContract implements Contract {
 
     validate(model: QueryDto): boolean {
         const flunt = new Flunt();
+
+        if (!model.query)
+            model.query = {};
 
         flunt.isSmallerThan(model.take, 1001, 'Paginação limitada a 1000 registros');
 
