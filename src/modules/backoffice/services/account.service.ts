@@ -1,11 +1,13 @@
 import { Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from '../models/user.model';
+import { User } from 'src/modules/backoffice/models/user.model';
+import { Customer } from '../models/customer.model';
 
 @Injectable()
 export class AccountService {
     constructor(
+        @InjectModel('Customer') private readonly customerModel: Model<Customer>,
         @InjectModel('User') private readonly userModel: Model<User>
     ) { }
 
@@ -24,7 +26,23 @@ export class AccountService {
         return await this.userModel.findOneAndUpdate({ username }, data);
     }
 
-    async remove(id: any): Promise<User> {
-        return await this.userModel.findByIdAndDelete(id);
+    async authenticate(username, password): Promise<Customer> {
+        var user = await this.userModel
+            .findOne(
+                {
+                    username: username,
+                    password: password
+                })
+            .exec();
+
+        var customer = await this.customerModel
+            .findOne(
+                {
+                    user: user._id,
+                })
+            .populate('user', '-password')
+            .exec();
+
+        return customer;
     }
 }

@@ -47,13 +47,13 @@ export class CustomerController {
         let user;
         let customer;
         try {
-            user = await this.accountService.create(new User(model.document, model.password, true));
+            user = await this.accountService.create(new User(model.document, model.password, ['user'], true));
             customer = new Customer(model.name, model.document, model.email, [], null, null, null, user);
             const res = await this.customerService.create(customer);
             return new Result('Cliente criado com sucesso', true, res, null);
         } catch (error) {
             // Rollback manual
-            this.accountService.remove(user.id);
+            //this.accountService.remove(user.id);
             throw new HttpException(new Result('Nao foi possível realizar o cadastro', false, null, error), HttpStatus.BAD_REQUEST);
         }
     }
