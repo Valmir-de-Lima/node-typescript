@@ -1,4 +1,5 @@
 import { Model } from 'mongoose';
+import { Md5 } from 'md5-typescript';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from 'src/modules/backoffice/models/user.model';
@@ -27,22 +28,19 @@ export class AccountService {
     }
 
     async authenticate(username, password): Promise<Customer> {
-        var user = await this.userModel
-            .findOne(
-                {
-                    username: username,
-                    password: password
-                })
-            .exec();
-
         var customer = await this.customerModel
-            .findOne(
-                {
-                    user: user._id,
-                })
-            .populate('user', '-password')
+            .findOne({ document: username })
+            .populate('user')
             .exec();
 
-        return customer;
+        if (customer === null)
+            return null;
+
+        const pass = await Md5.init(`${password}${process.env.SALT_KEY}`);
+        if (pass.toString() == customer.user.password.toString()) {
+            return customer;
+        } else {
+            return null;
+        }
     }
 }

@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Post, Put, UseInterceptors } from "@nestjs/common";
+import { Md5 } from "md5-typescript";
 import { Result } from "../models/result.model";
-import { ValidatorInterceptor } from "src/interceptors/validator.interceptor";
+import { ValidatorInterceptor } from "src/shared/interceptors/validator.interceptor";
 import { CreateCustomerContract } from "../contracts/customer/create-customer.contract";
 import { CreateCustomerDto } from "../dtos/customer/create-customer.dto";
 import { AccountService } from "../services/account.service";
@@ -13,6 +14,7 @@ import { UpdateCustomerDto } from "../dtos/customer/update-customer.dto";
 import { UpdateCustomerContract } from "../contracts/customer/update-customer.contract";
 import { CreateCreditCardContract } from "../contracts/customer/create-credit-card.contract";
 import { CreditCard } from "../models/creditcard.model";
+import { CacheInterceptor } from "@nestjs/cache-manager";
 
 @Controller('v1/customers')
 export class CustomerController {
@@ -23,6 +25,7 @@ export class CustomerController {
     }
 
     @Get()
+    @UseInterceptors(CacheInterceptor)
     async getAll() {
         const customers = await this.customerService.findAll();
         return new Result('Listagem de clientes bem sucedida', true, customers, null);
@@ -47,7 +50,8 @@ export class CustomerController {
         let user;
         let customer;
         try {
-            user = await this.accountService.create(new User(model.document, model.password, ['user'], true));
+            const password = await Md5.init(`${model.password}${process.env.SALT_KEY}`);
+            user = await this.accountService.create(new User(model.document, password, ['user'], true));
             customer = new Customer(model.name, model.document, model.email, [], null, null, null, user);
             const res = await this.customerService.create(customer);
             return new Result('Cliente criado com sucesso', true, res, null);

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
+import { CacheModule } from '@nestjs/cache-manager';
 
 import { CustomerSchema } from './schemas/customer.schema';
 import { UserSchema } from './schemas/user.schema';
@@ -17,12 +18,15 @@ import { CustomerController } from './controllers/customer.controller';
 import { AddressController } from './controllers/address.controller';
 import { PetController } from './controllers/pet.controller';
 import { AccountController } from './controllers/account.controller';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
     imports: [
+        HttpModule,
+        CacheModule.register(),
         PassportModule.register({ defaultStrategy: 'jwt' }),
         JwtModule.register({
-            secret: '28cbc00a-8541-438d-9888-54147f5ce0d2',
+            secret: process.env.JWT_KEY,
             signOptions: {
                 expiresIn: 3600,
             },

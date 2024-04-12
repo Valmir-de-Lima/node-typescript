@@ -1,6 +1,6 @@
 import { Body, Controller, HttpException, HttpStatus, Param, Post, Put, UseInterceptors } from "@nestjs/common";
 import { Result } from "../models/result.model";
-import { ValidatorInterceptor } from "src/interceptors/validator.interceptor";
+import { ValidatorInterceptor } from "src/shared/interceptors/validator.interceptor";
 import { Pet } from "../models/pet.model";
 import { CreatePetContract } from "../contracts/pet/create-pet.contract";
 import { PetService } from "../services/pet.service";

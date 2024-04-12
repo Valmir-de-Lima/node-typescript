@@ -1,6 +1,5 @@
-import { Controller, Get, UseGuards, Post, Request, HttpStatus, UseInterceptors, Body, HttpException, Req } from "@nestjs/common";
+import { Controller, UseGuards, Post, HttpStatus, Body, HttpException, Req } from "@nestjs/common";
 import { JwtAuthGuard } from "src/shared/guards/auth.guard";
-import { RoleInterceptor } from "src/shared/interceptors/role.interceptor";
 import { AuthService } from "src/shared/services/auth.service";
 import { AuthenticateDto } from "../dtos/account/autenticate.dto";
 import { AccountService } from "../services/account.service";
@@ -8,6 +7,7 @@ import { Result } from "../models/result.model";
 import { ResetPasswordDto } from "../dtos/account/reset-password.dto";
 import { ChangePasswordDto } from "../dtos/account/change-password.dto";
 import { Guid } from "guid-typescript";
+import { Md5 } from "md5-typescript";
 
 @Controller('v1/accounts')
 export class AccountController {
@@ -21,22 +21,18 @@ export class AccountController {
     // Autenticar - localhost:3000/v1/accounts/authenticate
     @Post('authenticate')
     async authenticate(@Body() model: AuthenticateDto): Promise<any> {
-        try {
-            const customer = await this.accountService.authenticate(model.username, model.password);
-            // Caso não encontre o usuário
-            if (!customer)
-                throw new HttpException(new Result('Usuário ou senha inválidos', false, null, null), HttpStatus.UNAUTHORIZED);
+        const customer = await this.accountService.authenticate(model.username, model.password);
+        // Caso não encontre o usuário
+        if (!customer)
+            throw new HttpException(new Result('Usuário ou senha inválidos', false, null, null), HttpStatus.UNAUTHORIZED);
 
-            // Caso o usuário esteja inativo
-            if (!customer.user.active)
-                throw new HttpException(new Result('Usuário inativo', false, null, null), HttpStatus.UNAUTHORIZED);
+        // Caso o usuário esteja inativo
+        if (!customer.user.active)
+            throw new HttpException(new Result('Usuário inativo', false, null, null), HttpStatus.UNAUTHORIZED);
 
-            // Gera o token
-            const token = await this.authService.createToken(customer.document, customer.email, '', customer.user.roles);
-            return new Result('Autenticação realizada com sucesso', true, token, null);
-        } catch (error) {
-            throw new HttpException(new Result('Não foi possível realizar a autenticação', false, null, error), HttpStatus.BAD_REQUEST);
-        }
+        // Gera o token
+        const token = await this.authService.createToken(customer.document, customer.email, '', customer.user.roles);
+        return new Result('Autenticação realizada com sucesso', true, token, null);
     }
 
     // Resetar a senha
@@ -45,7 +41,8 @@ export class AccountController {
         try {
             // TODO: Enviar E-mail com a senha
 
-            const password = Guid.create().toString().substring(0, 8).replace('-', '');
+            const guid = Guid.create().toString().substring(0, 8).replace('-', '');
+            const password = await Md5.init(`${guid}${process.env.SALT_KEY}`);
             await this.accountService.update(model.document, { password: password });
             return new Result('Uma nova senha foi enviada para seu E-mail', true, null, null);
         } catch (error) {
@@ -58,8 +55,8 @@ export class AccountController {
     @UseGuards(JwtAuthGuard)
     async changePassword(@Req() request, @Body() model: ChangePasswordDto): Promise<any> {
         try {
-            // TODO: Encriptar senha
-            await this.accountService.update(request.user.document, { password: model.newPassword });
+            const password = await Md5.init(`${model.newPassword}${process.env.SALT_KEY}`);
+            await this.accountService.update(request.user.document, { password: password });
             return new Result('Sua senha foi alterada com sucesso!', true, null, null);
         } catch (error) {
             throw new HttpException(new Result('Não foi possível alterar sua senha', false, null, error), HttpStatus.BAD_REQUEST);
