@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BackofficeModule } from './modules/backoffice/backoffice.module';
 import { StoreModule } from './modules/store/store.module';
+import { AgendaModule } from './modules/agenda/agenda.module';
 
 @Module({
   imports: [
@@ -14,13 +15,14 @@ import { StoreModule } from './modules/store/store.module';
       host: '127.0.0.1',
       port: 3306,
       username: 'root',
-      password: '31122022',
+      password: process.env.PASSWORD_MYSQL,
       database: 'store',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true
     }),
     BackofficeModule,
-    StoreModule],
+    StoreModule,
+    AgendaModule],
   controllers: [],
   providers: [],
 })
