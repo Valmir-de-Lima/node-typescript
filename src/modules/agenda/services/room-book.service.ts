@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { BookRoomCommand } from '../commands/book-room.command';
-import { RoomBookedEvent } from '../events/room-booked.event';
 
 @Injectable()
 export class RoomBookService {
@@ -9,11 +8,9 @@ export class RoomBookService {
         private readonly commandBus: CommandBus
     ) { }
 
-    async Book(customerId: string, roomId: string) {
-        console.log('RoomBookService - Executando o servico...');
-
+    async Book(command: BookRoomCommand) {
         return await this.commandBus.execute(
-            new BookRoomCommand(customerId, roomId)
+            command
         );
     }
 }

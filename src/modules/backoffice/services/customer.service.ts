@@ -5,7 +5,6 @@ import { Customer } from '../models/customer.model';
 import { QueryDto } from '../dtos/query.dto';
 import { UpdateCustomerDto } from '../dtos/customer/update-customer.dto';
 import { CreditCard } from '../models/creditcard.model';
-import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class CustomerService {

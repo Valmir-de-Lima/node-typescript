@@ -6,6 +6,6 @@ import { RoomBookedEvent } from '../room-booked.event';
 export class RoomBookedHandler implements IEventHandler<RoomBookedEvent> {
 
     handle(event: RoomBookedEvent) {
-        console.log('RoomBookedEvent:handle - Manipulando o evento Room Booked...');
+        console.log(event.customerId + ' ' + event.roomId + ' ' + event.date);
     }
 }

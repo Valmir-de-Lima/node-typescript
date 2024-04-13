@@ -1,8 +1,9 @@
 export class RoomBookedEvent {
     constructor(
         public readonly customerId: string,
-        public readonly roomId: string
+        public readonly roomId: string,
+        public readonly date: Date
     ) {
-        console.log('Enviando email para o cliente ' + customerId + ' sobre a reserva da sala ' + roomId)
+        // TODO: Enviar E-mail ao usuário sobre reserva
     }
 }
